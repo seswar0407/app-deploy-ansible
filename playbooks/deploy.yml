@@ -2,12 +2,12 @@
 
 - name: Deploy latest application on webservers
   hosts: webservers
-  become: tru
+  become: true
 
 tasks:
   vars:
    app-dir: /opt/myapp
-   git_repo: 'https://github.com/your-username/your-app-repo.git'
+   git_repo: 'https://github.com/seswar0407/app-deploy-ansible.git'
    git_branch: main
    
   tasks:
