@@ -1,0 +1,47 @@
+---
+
+- name: Deploy latest application on webservers
+  hosts: webservers
+  become: tru
+
+tasks:
+  vars:
+   app-dir: /opt/myapp
+   git_repo: 'https://github.com/your-username/your-app-repo.git'
+   git_branch: main
+   
+  tasks:
+     - name: Ensure git is installed
+       apt:
+         name: git
+         state: present
+       when: ansible_os_family == "Debian"
+    
+     - name: Ensure app directory exists
+       file:
+          path: "{{ app_dir }}"
+          state: directory
+          owner: ubuntu
+          group: ubuntu
+          mode: '0755'
+
+     - name: Checkout latest code
+       git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_dir }}"
+        version: "{{ git_branch }}"
+        force: yes
+        update: yes
+
+     - name: Install Python dependencies (if any)
+       pip:
+        requirements: "{{ app_dir }}/requirements.txt"
+       when: >
+        ansible.builtin.stat(path="{{ app_dir }}/requirements.txt").stat.exists
+     
+     - name: Restart application systemd service
+      systemd:
+       name: myapp
+       state: restarted
+       enabled: true
+      ignore_errors: false
